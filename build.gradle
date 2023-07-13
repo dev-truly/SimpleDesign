@@ -1,0 +1,165 @@
+buildscript {
+    ext {
+        queryDslVersion = "5.0.0"
+    }
+
+    repositories {
+        mavenCentral() // or gradlePluginPortal()
+    }
+    dependencies {
+        classpath("com.dipien:semantic-version-gradle-plugin:2.0.0")
+        classpath("gradle.plugin.se.bjurr.gitchangelog:git-changelog-gradle-plugin:1.79.0")
+    }
+}
+
+
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.7.4'
+    id 'io.spring.dependency-management' version '1.1.0'
+    //querydsl 추가
+    id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
+    id 'se.bjurr.gitchangelog.git-changelog-gradle-plugin' version '1.79.0'
+}
+
+group = 'com.simpledesign'
+version = "0.0.1"
+sourceCompatibility = '11'
+
+apply plugin: "com.dipien.semantic-version"
+apply plugin: "se.bjurr.gitchangelog.git-changelog-gradle-plugin"
+
+jar { // plain archive 생성 방지
+    enabled = false
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+task generateGitChangelogInlineTemplate(type: se.bjurr.gitchangelog.plugin.gradle.GitChangelogTask) {
+    fromRepo = this.getProject().getRootProject().getRootDir().getAbsolutePath();
+    file = new File("CHANGELOG.md");
+    timeZone = "Asia/Seoul"
+    templateContent = """
+# Changelog
+
+# Git Changelog Maven plugin changelog
+
+Changelog of Git Changelog Maven plugin.
+
+{{#tags}}
+## {{name}}
+ {{#issues}}
+  {{#hasLink}}
+### {{name}} [{{issue}}]({{link}}) {{title}}
+  {{/hasLink}}
+  {{^hasLink}}
+### {{name}}
+  {{/hasLink}}
+
+  {{#commits}}
+[{{hash}}](https://bitbucket.org/allimlab/was_safety_ndms/commits/{{hash}}) {{authorName}} *{{commitTime}}*
+
+{{{message}}}
+
+  {{/commits}}
+
+ {{/issues}}
+{{/tags}}
+ """;
+}
+
+tasks.register("generateChangelogs") {
+    doLast { }
+}
+
+generateChangelogs.dependsOn {
+    tasks.findAll { task -> task.name.startsWith('generateGit') }
+}
+
+sourceSets {
+    main.java.srcDirs = ['src/main/java']
+}
+
+task versionUpdate {
+    doLast {
+        def versionType = project.property('versionType')
+        def commitMsg = project.property('commitMsg')
+        project.exec {
+            commandLine './gradlew', 'incrementVersion', "--versionIncrementType=$versionType" // , "--commitMessagePrefix=$commitMsg\n", "--versionIncrementBranch=master"
+        }
+        project.exec {
+            commandLine 'git', 'tag', version
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://jitpack.io" } // Add this line
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-web-services'
+    // validation 추가
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.2'
+    implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4'
+
+    // querydsl 추가
+    implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.8.1'
+    implementation 'org.testng:testng:7.1.0'
+    implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
+    implementation "com.querydsl:querydsl-sql:${queryDslVersion}"
+    annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}"
+
+    // Thymeleaf
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.1.0'
+
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
+
+    // ModelMapper 추가
+    implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.4.4'
+
+    implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
+    implementation group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
+
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    implementation 'org.springframework.amqp:spring-rabbit'
+
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// querydsl 세팅 시작
+def querydslDir = "$buildDir/generated/querydsl"
+querydsl {
+    jpa = true
+    querydslSourcesDir = querydslDir
+}
+sourceSets {
+    main.java.srcDir querydslDir
+}
+configurations {
+    querydsl.extendsFrom compileClasspath
+}
+compileQuerydsl {
+    options.annotationProcessorPath = configurations.querydsl
+}
+// querydsl 세팅 끝

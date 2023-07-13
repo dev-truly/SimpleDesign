@@ -1,0 +1,30 @@
+server:
+  port: 8097
+
+spring:
+  datasource:
+    primary:
+      hikari:
+        driver-class-name: org.mariadb.jdbc.Driver
+        jdbc-url: ENC(olAurZrw8SJtJM/sg42uehmwLelMAnqsOEzLDDwu/goMF1ISk+3FIaMGVSsIP0y0wdnAxU2sUZVsa64B3edSXOI/rMuI5jYTtNBMLOOqPPgJR3ysdAoNj8OO9xNJxIM6+3SYO42Mhrs=)
+        username: ENC(HnqhnTkjxt+SXOkV919Uog==)
+        password: ENC(dhGlZy24YvK36JEtoVFd+AatEsGgKHJk)
+
+  ## JPA
+  jpa:
+    generate-ddl: false
+    show-sql: true
+  rabbitmq:
+    host: test
+    port: 5672
+    username: test
+    password: test
+    virtual-host: test
+
+ndms:
+  obsr-interval: 1
+  local-government-do:
+    baseurl: http://127.0.0.1:8097
+    service-key: 123125151321
+    default-set-path: /api/test
+

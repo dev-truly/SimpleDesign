@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration  scan="true" scanPeriod="30 seconds"> <!-- logback 구현체가 설정을 확인하는 주기 -->
+  <springProfile name="local">
+    <property name="moduleId" value="notify_spring_boot"/><!-- moduleId는 프로젝트가 설치된 폴더명 또는 구분할 수 있는 식별자이면 됨 -->
+    <property name="type" value="safety"/><!-- 로그파일명을 구성하는 인자 -->
+    <property name="log" value="logs"/><!-- log를 저장할 최종 디렉토리명 -->
+    <property name="dir" value="/Users/dev-sincerity/Desktop/work/satech/resouces/ndms/ndms_log"/>
+  </springProfile>
+
+  <springProfile name="
+  winlocate
+  ">
+    <property name="moduleId" value="notify_spring_boot"/><!-- moduleId는 프로젝트가 설치된 폴더명 또는 구분할 수 있는 식별자이면 됨 -->
+    <property name="type" value="safety"/><!-- 로그파일명을 구성하는 인자 -->
+    <property name="log" value="logs"/><!-- log를 저장할 최종 디렉토리명 -->
+    <property name="dir" value="{path}/ndms_logs"/>
+  </springProfile>
+
+  <springProfile name="
+  winlocate
+  ">
+    <logger name="org.hibernate.SQL" level="DEBUG" />
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" />
+  </springProfile>
+
+  <!-- Appenders -->
+  <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>DEBUG</level>
+    </filter>
+    <encoder>
+      <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%thread] %logger{30} %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="DEBUG_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>DEBUG</level>
+    </filter>
+    <file>${dir}/${log}/${type}_debug.log</file>
+    <append>true</append>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${dir}/${log}/${type}_debug.%d{yyyy-MM-dd}.gz</fileNamePattern>
+      <maxHistory>30</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%thread] %logger %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="INFO_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>INFO</level>
+    </filter>
+    <file>${dir}/${log}/${type}_info.log</file>
+    <append>true</append>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${dir}/${log}/${type}_info.%d{yyyy-MM-dd}.gz</fileNamePattern>
+      <maxHistory>30</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%thread] %logger %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="WARN_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>WARN</level>
+    </filter>
+    <file>${dir}/${log}/${type}_warn.log</file>
+    <append>true</append>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${dir}/${log}/${type}_warn.%d{yyyy-MM-dd}.gz</fileNamePattern>
+      <maxHistory>30</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%thread] %logger %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="ERROR_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>WARN</level>
+    </filter>
+    <file>${dir}/${log}/${type}_error.log</file>
+    <append>true</append>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${dir}/${log}/${type}_error.%d{yyyy-MM-dd}.gz</fileNamePattern>
+      <maxHistory>30</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%thread] %logger %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- TRACE > DEBUG > INFO > WARN > ERROR > OFF -->
+  <!-- Root Logger -->
+  <root level="INFO">
+    <appender-ref ref="console" />
+    <appender-ref ref="DEBUG_LOG" />
+    <appender-ref ref="INFO_LOG" />
+    <appender-ref ref="WARN_LOG" />
+    <appender-ref ref="ERROR_LOG" />
+  </root>
+
+</configuration>
